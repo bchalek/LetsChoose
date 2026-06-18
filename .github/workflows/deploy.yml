@@ -39,9 +39,9 @@ jobs:
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LETSCHOOSE_86051 }}
 
-      - name: Deploy Firestore & Storage rules
+      - name: Deploy Firestore rules
         if: github.event_name == 'push'
-        run: npx firebase-tools deploy --only firestore:rules,storage --project letschoose-86051 --non-interactive
+        run: npx firebase-tools deploy --only firestore:rules --project letschoose-86051 --non-interactive
 
       - name: Deploy to Firebase Hosting (preview on PR)
         if: github.event_name == 'pull_request'
