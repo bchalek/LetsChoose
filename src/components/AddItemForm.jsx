@@ -21,11 +21,13 @@ export default function AddItemForm({ listId, nick, addedBy, moderation }) {
   const [preview, setPreview] = useState(null)
   const [saving, setSaving] = useState(false)
   const [open, setOpen] = useState(false)
+  const [error, setError] = useState('')
 
   async function submit(e) {
     e.preventDefault()
     if (!title.trim()) return
     setSaving(true)
+    setError('')
     try {
       let imageUrl = null
       if (type === 'image' && imageFile) {
@@ -44,6 +46,8 @@ export default function AddItemForm({ listId, nick, addedBy, moderation }) {
       showToast(moderation ? 'Dodano — czeka na zatwierdzenie przez autora.' : 'Dodano element!')
       setTitle(''); setUrl(''); setDesc(''); setImageFile(null); setPreview(null)
       setOpen(false)
+    } catch (err) {
+      setError(`Błąd: ${err.message}`)
     } finally {
       setSaving(false)
     }
@@ -100,6 +104,7 @@ export default function AddItemForm({ listId, nick, addedBy, moderation }) {
           <label>Opis (opcjonalnie)</label>
           <textarea placeholder="Dlaczego to polecasz..." value={desc} onChange={e => setDesc(e.target.value)} maxLength={500} />
         </div>
+        {error && <p style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 10 }}>{error}</p>}
         <div style={{ display: 'flex', gap: 8 }}>
           <button type="submit" className="btn btn-primary" disabled={saving || !title.trim()}>
             {saving ? <><span className="spinner" style={{width:14,height:14}} /> Dodawanie...</> : 'Dodaj'}

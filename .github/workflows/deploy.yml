@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting
+name: Deploy to Firebase
 
 on:
   push:
@@ -32,6 +32,12 @@ jobs:
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
+
+      - name: Deploy Firestore & Storage rules
+        if: github.event_name == 'push'
+        run: npx firebase-tools deploy --only firestore:rules,storage --project letschoose-86051 --non-interactive
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LETSCHOOSE_86051 }}
 
       - name: Deploy to Firebase Hosting (preview on PR)
         if: github.event_name == 'pull_request'
