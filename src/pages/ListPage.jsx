@@ -132,56 +132,28 @@ export default function ListPage() {
         </div>
       )}
 
-      {list.votingMode !== 'ranking' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {approvedItems.filter(i => i.approved !== false).length === 0 && (
-            <div className="card" style={{ textAlign: 'center', padding: 40 }}>
-              <p className="text-muted">Brak elementów na liście.{canAdd ? ' Dodaj pierwszy!' : ''}</p>
-            </div>
-          )}
-          {renderItems(approvedItems).map(item => (
-            <ItemCard
-              key={item.id}
-              item={item}
-              list={list}
-              votes={votes}
-              comments={comments}
-              uuid={uuid}
-              nick={nick}
-              isAdmin={isAdmin}
-              onApprove={handleApprove}
-              onDelete={handleDelete}
-              onToggleDone={handleToggleDone}
-            />
-          ))}
-        </div>
-      )}
-
-      {list.votingMode === 'ranking' && approvedItems.filter(i => i.approved !== false).length === 0 && (
-        <div className="card" style={{ textAlign: 'center', padding: 40 }}>
-          <p className="text-muted">Brak elementów na liście.{canAdd ? ' Dodaj pierwszy!' : ''}</p>
-        </div>
-      )}
-
-      {list.votingMode === 'ranking' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
-          {items.filter(i => i.approved === false && isAdmin).map(item => (
-            <ItemCard
-              key={item.id}
-              item={item}
-              list={list}
-              votes={votes}
-              comments={comments}
-              uuid={uuid}
-              nick={nick}
-              isAdmin={isAdmin}
-              onApprove={handleApprove}
-              onDelete={handleDelete}
-              onToggleDone={handleToggleDone}
-            />
-          ))}
-        </div>
-      )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {approvedItems.filter(i => i.approved !== false).length === 0 && (
+          <div className="card" style={{ textAlign: 'center', padding: 40 }}>
+            <p className="text-muted">Brak elementów na liście.{canAdd ? ' Dodaj pierwszy!' : ''}</p>
+          </div>
+        )}
+        {renderItems(approvedItems).map(item => (
+          <ItemCard
+            key={item.id}
+            item={item}
+            list={list}
+            votes={votes}
+            comments={comments}
+            uuid={uuid}
+            nick={nick}
+            isAdmin={isAdmin}
+            onApprove={handleApprove}
+            onDelete={handleDelete}
+            onToggleDone={handleToggleDone}
+          />
+        ))}
+      </div>
 
       {canAdd && !closed && (
         <AddItemForm listId={listId} nick={nick} addedBy={uuid} moderation={!isAdmin && list.moderation} />

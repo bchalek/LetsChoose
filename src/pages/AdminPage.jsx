@@ -128,7 +128,7 @@ export default function AdminPage() {
         </button>
         {votes.length > 0 && (
           <button className="btn btn-secondary btn-sm" onClick={handleClearVotes}>
-            🗑 Usuń wszystkie głosy
+            🗑 Wyczyść głosowanie
           </button>
         )}
         {pendingItems.length > 0 && (
