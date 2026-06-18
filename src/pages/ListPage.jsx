@@ -118,42 +118,51 @@ export default function ListPage() {
         )}
       </div>
 
-      {list.votingMode === 'ranking' && approvedItems.filter(i => i.approved !== false).length > 0 && (
-        <div className="card" style={{ marginBottom: 24 }}>
-          <div className="section-title" style={{ marginBottom: 16 }}>Ułóż ranking</div>
-          <VotingRanking
-            listId={listId}
-            items={approvedItems}
-            votes={votes}
-            uuid={uuid}
-            nick={nick}
-            closed={closed}
-          />
-        </div>
-      )}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {approvedItems.filter(i => i.approved !== false).length === 0 && (
+      {list.votingMode === 'ranking' ? (
+        items.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: 40 }}>
             <p className="text-muted">Brak elementów na liście.{canAdd ? ' Dodaj pierwszy!' : ''}</p>
           </div>
-        )}
-        {renderItems(approvedItems).map(item => (
-          <ItemCard
-            key={item.id}
-            item={item}
+        ) : (
+          <VotingRanking
+            listId={listId}
             list={list}
+            items={items}
             votes={votes}
             comments={comments}
             uuid={uuid}
             nick={nick}
+            closed={closed}
             isAdmin={isAdmin}
             onApprove={handleApprove}
             onDelete={handleDelete}
             onToggleDone={handleToggleDone}
           />
-        ))}
-      </div>
+        )
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {approvedItems.filter(i => i.approved !== false).length === 0 && (
+            <div className="card" style={{ textAlign: 'center', padding: 40 }}>
+              <p className="text-muted">Brak elementów na liście.{canAdd ? ' Dodaj pierwszy!' : ''}</p>
+            </div>
+          )}
+          {renderItems(approvedItems).map(item => (
+            <ItemCard
+              key={item.id}
+              item={item}
+              list={list}
+              votes={votes}
+              comments={comments}
+              uuid={uuid}
+              nick={nick}
+              isAdmin={isAdmin}
+              onApprove={handleApprove}
+              onDelete={handleDelete}
+              onToggleDone={handleToggleDone}
+            />
+          ))}
+        </div>
+      )}
 
       {canAdd && !closed && (
         <AddItemForm listId={listId} nick={nick} addedBy={uuid} moderation={!isAdmin && list.moderation} />
