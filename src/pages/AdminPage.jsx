@@ -5,6 +5,7 @@ import { updateList, updateItem, deleteItem } from '../lib/db'
 import { computeLikesResults, computeTopNResults, computeRankingResults } from '../lib/votes'
 import { showToast } from '../components/Toast'
 import ItemCard from '../components/ItemCard'
+import AddItemForm from '../components/AddItemForm'
 import ResultsBar from '../components/ResultsBar'
 
 export default function AdminPage() {
@@ -72,8 +73,14 @@ export default function AdminPage() {
     showToast('Element usunięty.')
   }
 
+  async function handleToggleDone(itemId, currentlyDone) {
+    await updateItem(listId, itemId, { done: !currentlyDone })
+    showToast(currentlyDone ? 'Oznaczono jako niezrealizowane.' : 'Oznaczono jako zrealizowane!')
+  }
+
   const pendingItems = items.filter(i => i.approved === false)
   const approvedItems = items.filter(i => i.approved !== false)
+  const doneCount = approvedItems.filter(i => i.done).length
 
   // Results summary
   let resultsData = []
@@ -122,7 +129,7 @@ export default function AdminPage() {
 
       <div className="admin-tabs">
         {[
-          { key: 'items', label: `Elementy (${approvedItems.length})` },
+          { key: 'items', label: `Elementy (${approvedItems.length - doneCount} pozostałych)` },
           { key: 'pending', label: `Oczekujące (${pendingItems.length})` },
           { key: 'results', label: `Wyniki (${votes.length} głosów)` },
           { key: 'share', label: 'Udostępnij' },
@@ -136,7 +143,7 @@ export default function AdminPage() {
       {tab === 'items' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {approvedItems.length === 0 && <p className="text-muted">Brak elementów.</p>}
-          {approvedItems.map(item => (
+          {[...approvedItems.filter(i => !i.done), ...approvedItems.filter(i => i.done)].map(item => (
             <ItemCard
               key={item.id}
               item={item}
@@ -148,8 +155,10 @@ export default function AdminPage() {
               isAdmin
               onApprove={handleApprove}
               onDelete={handleDelete}
+              onToggleDone={handleToggleDone}
             />
           ))}
+          <AddItemForm listId={listId} nick="Admin" addedBy="admin" moderation={false} />
         </div>
       )}
 
@@ -168,6 +177,7 @@ export default function AdminPage() {
               isAdmin
               onApprove={handleApprove}
               onDelete={handleDelete}
+              onToggleDone={handleToggleDone}
             />
           ))}
         </div>

@@ -11,17 +11,21 @@ function safeUrl(u) {
   }
 }
 
-export default function ItemCard({ item, list, votes, comments, uuid, nick, isAdmin, onApprove, onDelete }) {
+export default function ItemCard({ item, list, votes, comments, uuid, nick, isAdmin, onApprove, onDelete, onToggleDone }) {
   const isPending = item.approved === false
+  const isDone = item.done === true
   const closed = list.closed || (list.expiresAt && list.expiresAt.toDate?.() < new Date())
 
   return (
-    <div className={`item-card ${isPending ? 'pending' : ''}`}>
+    <div className={`item-card ${isPending ? 'pending' : ''} ${isDone ? 'done' : ''}`}>
       {item.imageUrl && (
         <img src={item.imageUrl} alt={item.title} className="item-card-image" />
       )}
       <div className="item-card-body">
-        <div className="item-card-title">{item.title}</div>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+          <div className="item-card-title">{item.title}</div>
+          {isDone && <span className="badge badge-green" style={{ flexShrink: 0 }}>✓ Zrealizowane</span>}
+        </div>
         {item.description && <div className="item-card-desc">{item.description}</div>}
         {safeUrl(item.url) && (
           <a href={safeUrl(item.url)} target="_blank" rel="noopener noreferrer" className="item-card-link">
@@ -42,14 +46,16 @@ export default function ItemCard({ item, list, votes, comments, uuid, nick, isAd
             )}
           </div>
         ) : (
-          <div style={{ marginTop: 12 }}>
-            {list.votingMode === 'likes' && (
-              <VotingLikes listId={list.id} itemId={item.id} votes={votes} uuid={uuid} nick={nick} closed={closed} />
-            )}
-            {list.votingMode === 'topN' && (
-              <VotingTopN listId={list.id} itemId={item.id} votes={votes} uuid={uuid} nick={nick} topN={list.topN || 3} closed={closed} />
-            )}
-          </div>
+          !isDone && (
+            <div style={{ marginTop: 12 }}>
+              {list.votingMode === 'likes' && (
+                <VotingLikes listId={list.id} itemId={item.id} votes={votes} uuid={uuid} nick={nick} closed={closed} />
+              )}
+              {list.votingMode === 'topN' && (
+                <VotingTopN listId={list.id} itemId={item.id} votes={votes} uuid={uuid} nick={nick} topN={list.topN || 3} closed={closed} />
+              )}
+            </div>
+          )
         )}
       </div>
 
@@ -58,9 +64,19 @@ export default function ItemCard({ item, list, votes, comments, uuid, nick, isAd
           <span className="item-card-added-by">
             Dodano przez <strong>{item.addedBy}</strong>
           </span>
-          {isAdmin && (
-            <button className="btn btn-ghost btn-sm" onClick={() => onDelete(item.id)}>× Usuń</button>
-          )}
+          <div style={{ display: 'flex', gap: 6 }}>
+            {isAdmin && onToggleDone && (
+              <button
+                className={`btn btn-sm ${isDone ? 'btn-secondary' : 'btn-success'}`}
+                onClick={() => onToggleDone(item.id, isDone)}
+              >
+                {isDone ? '↩ Cofnij' : '✓ Zrealizowane'}
+              </button>
+            )}
+            {isAdmin && (
+              <button className="btn btn-ghost btn-sm" onClick={() => onDelete(item.id)}>× Usuń</button>
+            )}
+          </div>
         </div>
       )}
 

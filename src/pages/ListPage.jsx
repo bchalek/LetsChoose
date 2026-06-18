@@ -55,6 +55,9 @@ export default function ListPage() {
   const isAdmin = localStorage.getItem(`lc_admin_${listId}`) === list.adminToken
   const closed = list.closed || (list.expiresAt && list.expiresAt.toDate?.() < new Date())
   const approvedItems = items.filter(i => i.approved !== false || isAdmin)
+  const doneCount = approvedItems.filter(i => i.done && i.approved !== false).length
+  const totalApproved = approvedItems.filter(i => i.approved !== false).length
+  const pendingCount = items.filter(i => i.approved === false).length
 
   async function handleApprove(itemId) {
     await updateItem(listId, itemId, { approved: true })
@@ -66,7 +69,18 @@ export default function ListPage() {
     showToast('Element usunięty.')
   }
 
-  const pendingCount = items.filter(i => i.approved === false).length
+  async function handleToggleDone(itemId, currentlyDone) {
+    await updateItem(listId, itemId, { done: !currentlyDone })
+    showToast(currentlyDone ? 'Oznaczono jako niezrealizowane.' : 'Oznaczono jako zrealizowane!')
+  }
+
+  const canAdd = list.allowAdd || isAdmin
+
+  function renderItems(itemList) {
+    const undone = itemList.filter(i => !i.done)
+    const done = itemList.filter(i => i.done)
+    return [...undone, ...done]
+  }
 
   return (
     <div className="page">
@@ -86,6 +100,12 @@ export default function ListPage() {
           {list.votingMode === 'likes' && <span className="badge badge-gray">♥ Lajki</span>}
           {list.votingMode === 'topN' && <span className="badge badge-gray">★ Top {list.topN}</span>}
           {list.votingMode === 'ranking' && <span className="badge badge-gray">⠿ Ranking</span>}
+          {totalApproved > 0 && doneCount > 0 && (
+            <span className="badge badge-green">✓ {doneCount}/{totalApproved} zrealizowanych</span>
+          )}
+          {totalApproved > 0 && doneCount < totalApproved && (
+            <span className="badge badge-gray">Pozostało: {totalApproved - doneCount}</span>
+          )}
           {isAdmin && pendingCount > 0 && (
             <span className="badge badge-orange">⏳ {pendingCount} oczekujących</span>
           )}
@@ -114,12 +134,12 @@ export default function ListPage() {
 
       {list.votingMode !== 'ranking' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {approvedItems.length === 0 && (
+          {approvedItems.filter(i => i.approved !== false).length === 0 && (
             <div className="card" style={{ textAlign: 'center', padding: 40 }}>
-              <p className="text-muted">Brak elementów na liście.{list.allowAdd ? ' Dodaj pierwszy!' : ''}</p>
+              <p className="text-muted">Brak elementów na liście.{canAdd ? ' Dodaj pierwszy!' : ''}</p>
             </div>
           )}
-          {approvedItems.map(item => (
+          {renderItems(approvedItems).map(item => (
             <ItemCard
               key={item.id}
               item={item}
@@ -131,6 +151,7 @@ export default function ListPage() {
               isAdmin={isAdmin}
               onApprove={handleApprove}
               onDelete={handleDelete}
+              onToggleDone={handleToggleDone}
             />
           ))}
         </div>
@@ -138,7 +159,7 @@ export default function ListPage() {
 
       {list.votingMode === 'ranking' && approvedItems.filter(i => i.approved !== false).length === 0 && (
         <div className="card" style={{ textAlign: 'center', padding: 40 }}>
-          <p className="text-muted">Brak elementów na liście.{list.allowAdd ? ' Dodaj pierwszy!' : ''}</p>
+          <p className="text-muted">Brak elementów na liście.{canAdd ? ' Dodaj pierwszy!' : ''}</p>
         </div>
       )}
 
@@ -156,13 +177,14 @@ export default function ListPage() {
               isAdmin={isAdmin}
               onApprove={handleApprove}
               onDelete={handleDelete}
+              onToggleDone={handleToggleDone}
             />
           ))}
         </div>
       )}
 
-      {list.allowAdd && !closed && (
-        <AddItemForm listId={listId} nick={nick} addedBy={uuid} moderation={list.moderation} />
+      {canAdd && !closed && (
+        <AddItemForm listId={listId} nick={nick} addedBy={uuid} moderation={!isAdmin && list.moderation} />
       )}
     </div>
   )
