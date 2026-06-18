@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
 import { useList, useItems, useVotes, useComments } from '../hooks/useList'
-import { updateList, updateItem, deleteItem } from '../lib/db'
+import { updateList, updateItem, deleteItem, clearVotes } from '../lib/db'
 import { computeLikesResults, computeTopNResults, computeRankingResults } from '../lib/votes'
 import { showToast } from '../components/Toast'
 import ItemCard from '../components/ItemCard'
@@ -62,6 +62,12 @@ export default function AdminPage() {
     showToast(list.closed ? 'Lista otwarta.' : 'Lista zamknięta.')
   }
 
+  async function handleClearVotes() {
+    if (!confirm(`Usunąć wszystkie głosy (${votes.length})? Tej operacji nie można cofnąć.`)) return
+    await clearVotes(listId)
+    showToast('Wszystkie głosy zostały usunięte.')
+  }
+
   async function handleApprove(itemId) {
     await updateItem(listId, itemId, { approved: true })
     showToast('Element zatwierdzony.')
@@ -120,6 +126,11 @@ export default function AdminPage() {
         >
           {closed ? '▶ Otwórz głosowanie' : '■ Zamknij głosowanie'}
         </button>
+        {votes.length > 0 && (
+          <button className="btn btn-secondary btn-sm" onClick={handleClearVotes}>
+            🗑 Usuń wszystkie głosy
+          </button>
+        )}
         {pendingItems.length > 0 && (
           <span className="badge badge-orange" style={{ alignSelf: 'center' }}>
             ⏳ {pendingItems.length} oczekujących

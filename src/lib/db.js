@@ -1,6 +1,6 @@
 import {
   collection, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc,
-  onSnapshot, query, orderBy, serverTimestamp, where
+  getDocs, onSnapshot, query, orderBy, serverTimestamp, where
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
@@ -73,6 +73,11 @@ export async function setVote(listId, uuid, data) {
     ...data,
     updatedAt: serverTimestamp(),
   })
+}
+
+export async function clearVotes(listId) {
+  const snap = await getDocs(collection(db, 'lists', listId, 'votes'))
+  await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))
 }
 
 // --- Comments ---
