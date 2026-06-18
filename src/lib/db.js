@@ -80,6 +80,15 @@ export async function clearVotes(listId) {
   await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))
 }
 
+export async function deleteList(listId) {
+  const subcollections = ['items', 'votes', 'comments']
+  for (const sub of subcollections) {
+    const snap = await getDocs(collection(db, 'lists', listId, sub))
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))
+  }
+  await deleteDoc(doc(db, 'lists', listId))
+}
+
 // --- Comments ---
 
 export function subscribeComments(listId, callback) {

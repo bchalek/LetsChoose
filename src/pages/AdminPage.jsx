@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
 import { useList, useItems, useVotes, useComments } from '../hooks/useList'
-import { updateList, updateItem, deleteItem, clearVotes } from '../lib/db'
+import { updateList, updateItem, deleteItem, clearVotes, deleteList } from '../lib/db'
 import { computeLikesResults, computeTopNResults, computeRankingResults } from '../lib/votes'
 import { showToast } from '../components/Toast'
 import ItemCard from '../components/ItemCard'
@@ -68,6 +68,12 @@ export default function AdminPage() {
     showToast('Wszystkie głosy zostały usunięte.')
   }
 
+  async function handleDeleteList() {
+    if (!confirm(`Usunąć całą listę "${list.title}" wraz z elementami, głosami i komentarzami? Tej operacji nie można cofnąć.`)) return
+    await deleteList(listId)
+    navigate('/')
+  }
+
   async function handleApprove(itemId) {
     await updateItem(listId, itemId, { approved: true })
     showToast('Element zatwierdzony.')
@@ -131,6 +137,9 @@ export default function AdminPage() {
             🗑 Wyczyść głosowanie
           </button>
         )}
+        <button className="btn btn-danger btn-sm" onClick={handleDeleteList}>
+          🗑 Usuń listę
+        </button>
         {pendingItems.length > 0 && (
           <span className="badge badge-orange" style={{ alignSelf: 'center' }}>
             ⏳ {pendingItems.length} oczekujących
